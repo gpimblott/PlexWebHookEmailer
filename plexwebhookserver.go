@@ -1,21 +1,22 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"net/http"
-	"pimblott.com/plexWebhookServer/email"
 	"pimblott.com/plexWebhookServer/environment"
+	"pimblott.com/plexWebhookServer/notify"
 	"pimblott.com/plexWebhookServer/plex"
 	"pimblott.com/plexWebhookServer/plex/event"
 )
 
 var authToken string
 var plexServer = environment.GetEnvOrStop("PLEX_SERVER")
-var mailServer = environment.GetEnvOrStop("MAIL_SERVER")
-var mailUsername = environment.GetEnvOrStop("MAIL_USERNAME")
-var mailPassword = environment.GetEnvOrStop("MAIL_PASSWORD")
-var mailPort = environment.GetEnvOrStop("MAIL_PORT")
+var emailDetails = notify.EmailDetails {
+	Server:   environment.GetEnvOrStop("MAIL_SERVER"),
+	Port:     environment.GetEnvOrStop("MAIL_PORT"),
+	Username: environment.GetEnvOrStop("MAIL_USERNAME"),
+	Password: environment.GetEnvOrStop("MAIL_PASSWORD"),
+}
 var mailFrom = environment.GetEnvOrStop("MAIL_FROM")
 var mailTo = environment.GetEnvOrStop("MAIL_TO")
 
@@ -57,7 +58,7 @@ func handleWebHook(w http.ResponseWriter, req *http.Request) {
 			return
 		}
 
-		NewItem(details)
+		notify.EmailNewItem(emailDetails, mailFrom, mailTo, details)
 
 		break
 	case "device.new":
@@ -68,30 +69,6 @@ func handleWebHook(w http.ResponseWriter, req *http.Request) {
 	}
 
 	w.WriteHeader(200)
-}
-
-/**
-Perform notifications that a new item has been received
-*/
-func NewItem(mc event.MediaContainer) {
-	var body string
-
-	// Send an email for the new item
-	header := fmt.Sprintf("New item added to library %s\n\n", mc.LibrarySectionTitle)
-	if mc.Track != (event.Track{}) {
-		body = fmt.Sprintf("\t%s\n\t\t%s\n\t\t%s", mc.Track.GrandParent, mc.Track.Parent, mc.Track.Title)
-	}
-
-	if mc.Video != (event.Video{}) {
-		body = fmt.Sprintf("\t%s\n\t\t%s\n\t\t%s", mc.Video.GrandParent, mc.Video.Parent, mc.Video.Title)
-	}
-
-	err := email.Send(mailServer, mailPort, mailUsername, mailPassword, mailFrom, mailTo,
-		"plex: New item added to library", header+body)
-
-	if err != nil {
-		log.Printf("Error sending mail : %s", err)
-	}
 }
 
 /*
