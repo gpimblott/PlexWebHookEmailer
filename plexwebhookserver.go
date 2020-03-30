@@ -11,7 +11,7 @@ import (
 
 var authToken string
 var plexServer = environment.GetEnvOrStop("PLEX_SERVER")
-var emailDetails = notify.EmailDetails {
+var emailDetails = notify.EmailDetails{
 	Server:   environment.GetEnvOrStop("MAIL_SERVER"),
 	Port:     environment.GetEnvOrStop("MAIL_PORT"),
 	Username: environment.GetEnvOrStop("MAIL_USERNAME"),
