@@ -1,0 +1,8 @@
+version: '3'
+services:
+  PlexWebHookServer:
+    build: .
+    container_name: plex-webhook-server
+    image: gpimblott/plex-webhook-server
+    ports:
+      - "8090:8090"
