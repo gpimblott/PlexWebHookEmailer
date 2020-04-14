@@ -9,6 +9,9 @@ import (
 	"pimblott.com/plexWebhookServer/plex/event"
 )
 
+/*
+ Query the PLex server for the details of the new item added
+ */
 func GetMediaDetails(plexServer, authToken, item string) (mc event.MediaContainer, err error) {
 	// Get the detailed item information from the plex server
 	url := fmt.Sprintf("%s%s?X-Plex-Token=%s", plexServer, item, authToken)
@@ -28,11 +31,14 @@ func GetMediaDetails(plexServer, authToken, item string) (mc event.MediaContaine
 	// Decode the XML response
 	details := event.MediaContainer{}
 	DecodeMediaContainer(resp.Body, &details)
-	log.Printf("Media : %s", details)
+	log.Printf("Media : %s", resp.Body)
 
 	return details, nil
 }
 
+/*
+ Map the XML structure returned from Plex to a MediaContainer structure
+ */
 func DecodeMediaContainer(reader io.Reader, mc *event.MediaContainer) {
 	decoder := xml.NewDecoder(reader)
 	decoder.Decode(mc)
