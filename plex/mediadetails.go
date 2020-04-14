@@ -31,7 +31,6 @@ func GetMediaDetails(plexServer, authToken, item string) (mc event.MediaContaine
 	// Decode the XML response
 	details := event.MediaContainer{}
 	DecodeMediaContainer(resp.Body, &details)
-	log.Printf("Media : %s", resp.Body)
 
 	return details, nil
 }
